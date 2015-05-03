@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DietControlPro</title>
+	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="stylesheet"  href="css/jquery.mobile-1.4.0.min.css">
+	<link rel="stylesheet" href="_assets/css/jqm-demos.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
+	<script src="js/jquery.js"></script>
+	<script src="_assets/js/index.js"></script>
+	<script src="js/jquery.mobile-1.4.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/phonegap-1.2.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    // Wait for PhoneGap to load
+    var db = null;
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // PhoneGap is ready
+    function onDeviceReady() {
+        db = window.openDatabase("Database14", "1.0", "controlpro", 200000); 
+        db.transaction(populateDB, errorCB, successCB); 
+        }
+        // Populate the database
+     function populateDB(tx) {
+        // tx.executeSql('DROP TABLE IF EXISTS user');
+        // tx.executeSql("CREATE TABLE IF NOT EXISTS user (id INT, gender TEXT, age INT, height INT, weight INT, level TEXT, program TEXT, calories INT)"); 
+        db.transaction(function (tx) {
+        tx.executeSql("SELECT * FROM user",[] ,function (tx, results) {
+                
+            len = results.rows.length;
+            len--;
+                var gender = results.rows.item(len).gender;
+                var age = results.rows.item(len).age;
+                var height = results.rows.item(len).height;
+                var weight = results.rows.item(len).weight;
+                var level = results.rows.item(len).level;
+                var program = results.rows.item(len).program+" weight";
+                var calories = results.rows.item(len).calories;
+                calories = parseFloat(calories).toFixed(0);
+                calories = calories.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                document.querySelector('#gender').innerHTML +=  gender;
+                document.querySelector('#age').innerHTML +=  age;
+                document.querySelector('#height').innerHTML +=  height;
+                document.querySelector('#weight').innerHTML +=  weight;
+                document.querySelector('#level').innerHTML +=  level;
+                document.querySelector('#program').innerHTML +=  program;
+                document.querySelector('#calories').innerHTML +=  calories;
+
+        }, null);
+         });
+
+        // tx.executeSql("INSERT OR REPLACE INTO user (id, gender, age, height, weight, level, program, calories) VALUES (?,?,?,?,?,?,?,?)",[1, "male", 22, 180, 75, "very", "maintain",2000]);
+        // alert("tx: "+tx); 
+        }
+
+        // Transaction error callback
+        function errorCB(tx, err) {
+            // alert("Error processing SQL: "+err);
+            }
+
+        // Transaction success callback
+        function successCB() {
+            // alert("success!");
+            }
+
+        function resetData(){
+            db.transaction(function (tx) {
+            tx.executeSql("DELETE FROM user WHERE id=?",[1]);
+            });
+            location.reload();
+        }
+
+        window.onload = function () { if(! window.device) onDeviceReady() }
+    </script>
+
+    
+    <style>
+    .ui-page{
+        background-color:#f0fff0;
+    }
+    .ui-icon-carat-l{
+        width: 50px;
+        height: 50px;
+    }
+    div.ui-input-text { background-color:#ffffff;}
+
+    
+    </style>
+
+</head>
+<body>
+<br>
+<br>
+    <div data-role="navbar">
+        <ul>
+            <li><a href="#" onClick="parent.location='home.html'" class="ui-btn ui-shadow ui-corner-all ui-icon-carat-l ui-btn-icon-notext ui-btn-inline">Back</a></li>
+            <li style="margin-left:-50px"><h2 style="color:grey">DietControlPro</h2></li>
+        </ul>
+    </div><!-- /navbar -->
+<hr>
+<form>
+    <div class="ui-grid-a">
+        <div class="ui-block-a"><label for="gender" style="font-size:120%; padding-left:10px;">Gender:</label></div>
+        <div class="ui-block-b" style="margin-left:-20px;"><div id="gender"></div></div>
+    </div> 
+
+    <div class="ui-grid-a">
+        <div class="ui-block-a"><label for="age" style="font-size:120%; padding-left:10px;">Age(yrs):</label></div>
+        <div class="ui-block-b"><div id="age" style="margin-left:-20px;"></div></div>
+    </div>
+
+    <div class="ui-grid-a">
+        <div class="ui-block-a"><label for="height" style="font-size:120%; padding-left:10px;">Height(cm):</label></div>
+        <div class="ui-block-b"><div id="height" style="margin-left:-20px;"></div></div>
+    </div> 
+ 
+    <div class="ui-grid-a">
+        <div class="ui-block-a"><label for="weight" style="font-size:120%; padding-left:10px;">Weight(kg):</label></div>
+        <div class="ui-block-b"><div id="weight" style="margin-left:-20px;"></div></div>
+    </div> 
+
+    <div class="ui-grid-a"> 
+        <div class="ui-block-a"><label for="level" style="font-size:120%; padding-left:10px;">Activity level:</label></div>
+        <div class="ui-block-b"><div id="level" style="margin-left:-20px;"></div></div>
+    </div>   
+    
+    <div class="ui-grid-a">
+        <div class="ui-block-a"><label for="program" style="font-size:120%; padding-left:10px;">Program:</label></div>
+        <div class="ui-block-b"><div id="program" style="margin-left:-20px;"></div></div>
+    </div>
+
+    <center><h4>Your Calories is</h4></center>
+    <center><h2 style="color:green;"><div id="calories"></div></h2></center>
+    
+    <hr>
+    
+    <div class="ui-field-contain">
+    <label for="text-basic"></label>
+    <fieldset class="ui-grid-a">
+        <div class="ui-block-a"><input type="button" value="Edit" onclick="parent.location='setting.html'"></div>
+        <div class="ui-block-b"><input data-theme="b" type="button" value="Reset" onClick="resetData()"></div>
+    </fieldset>
+    </div>
+
+
+</form>
+
+
+</body>
+</html>

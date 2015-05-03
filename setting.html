@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DietControlPro</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet"  href="css/jquery.mobile-1.4.0.min.css">
+  <link rel="stylesheet" href="_assets/css/jqm-demos.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
+  <script src="js/jquery.js"></script>
+  <script src="_assets/js/index.js"></script>
+  <script src="js/jquery.mobile-1.4.0.min.js"></script>
+  
+  <script type="text/javascript" charset="utf-8" src="js/phonegap-1.2.0.js"></script>
+	<script type="text/javascript" charset="utf-8" src="js/cordova-2.2.0.js"></script>
+	<script type="text/javascript" charset="utf-8">
+// Wait for PhoneGap to load
+var db = null;
+document.addEventListener("deviceready", onDeviceReady, false);
+
+// PhoneGap is ready
+function onDeviceReady() {
+	db = window.openDatabase("Database14", "1.0", "controlpro", 200000); 
+	db.transaction(populateDB, errorCB, successCB); 
+	}
+
+// Populate the database
+ function populateDB(tx) {
+  tx.executeSql("CREATE TABLE IF NOT EXISTS user (id INT, gender TEXT, age INT, height INT, weight INT, level TEXT, program TEXT, calories INT)"); 
+	}
+	
+// Transaction error callback
+function errorCB(tx, err) {
+	// alert("Error processing SQL: "+err);
+	}
+
+// Transaction success callback
+function successCB() {
+	// alert("success!");
+	}
+
+
+function getdata(){
+  
+  db = window.openDatabase("Database14", "1.0", "controlpro", 200000);
+  var gender = document.getElementById("gender").value;
+  var age = document.getElementById("age").value;
+  var height = document.getElementById("height").value;
+  var weight = document.getElementById("weight").value;
+  var level = document.getElementById("level").value;
+  var program = document.getElementById("program").value;
+  var calories;
+  if (gender == "male"){
+    calories = 66.47 + (13.75 * weight) + (5 * height) - (6.76 * age);
+  }
+  else{
+    calories = 655.1 + (9.56 * weight) + (1.85 * height) -(4.68 * age);
+  }
+
+  if(level == "sedentary"){
+    calories *=1.2;
+  }else if(level == "lightly"){
+    calories *=1.375;
+  }else if(level == "moderately"){
+    calories *=1.55;
+  }else if(level == "very"){
+    calories *=1.725;
+  }
+  else{
+  }
+
+  if(program == "lost"){
+    calories *= 0.9;
+  }else if(program == "gain"){
+    calories *= 1.1;
+  }else{
+
+  }
+
+  // alert("tx: "+calories+" "+gender);
+  db.transaction(function(tx){
+
+    tx.executeSql("DELETE FROM user WHERE id=?",[1]); 
+    tx.executeSql("INSERT OR REPLACE INTO user (id, gender, age, height, weight, level, program, calories) VALUES (?,?,?,?,?,?,?,?)",[1,gender,age, height, weight, level, program, calories]);
+     
+
+  //     tx.executeSql("DELETE FROM food WHERE f_date=?",[date]); 
+  //     tx.executeSql("INSERT OR REPLACE INTO food (f_date, f_breakfast, f_lunch, f_dinner, f_snack) VALUES (?,?,?,?,?)",
+  //          [date, breakfast, lunch, dinner, snack]);
+    });
+  window.location.assign("personal.html");
+   }
+
+window.onload = function () { if(! window.device) onDeviceReady() } 
+
+</script>
+
+ <style>
+ .ui-icon-carat-l{
+        width: 50px;
+        height: 50px;
+    }
+ }
+ </style>
+  
+  
+</head>
+<body>
+    <br>
+    <br>
+    <div data-role="navbar">
+        <ul>
+            <li><a href="#" onClick="parent.location='personal.html'" class="ui-btn ui-shadow ui-corner-all ui-icon-carat-l ui-btn-icon-notext ui-btn-inline">Back</a></li>
+            <li style="margin-left:-50px"><h2 style="color:grey">DietControlPro</h2></li>
+        </ul>
+    </div><!-- /navbar -->
+
+
+<div>
+<form action="" method="post">
+<div class="ui-field-contain">
+    <label for="textinput-fc">Select your gender:</label>
+    <select name="select-choice-a" id="gender" data-native-menu="false">
+    <option value="male">Male</option>
+    <option value="female">Female</option>
+    </select>
+</div>
+<div class="ui-field-contain">
+    <label for="textinput-fc">Enter your age(yrs):</label>
+    <input type="number" name="textinput-fc" id="age">
+</div>
+<div class="ui-field-contain">
+    <label for="textinput-fc">Enter your height(cm):</label>
+    <input type="number" name="textinput-fc" id="height">
+</div>
+<div class="ui-field-contain">
+    <label for="textinput-fc">Enter your weight(kg):</label>
+    <input type="number" name="textinput-fc" id="weight">
+</div>
+
+<div class="ui-field-contain">
+    <label for="select-choice-a" class="select">What is the best describe your daily activity level ?</label>
+<select name="select-choice-a" id="level" data-native-menu="false">
+    <option value="sedentary">Sedentary</option>
+    <option value="lightly">Lightly active</option>
+    <option value="moderately">Moderately active</option>
+    <option value="very">Very active</option>
+</select>
+</div>
+
+<div class="ui-field-contain">
+    <label for="select-choice-a" class="select">Which program do you want ?</label>
+<select name="select-choice-a" id="program" data-native-menu="false">
+    <option value="loss">Loss weight</option>
+    <option value="maintain">Maintain weight</option>
+    <option value="gain">Gain weight</option>
+</select>
+</div>
+
+<div class="ui-field-contain">
+<label for="text-basic"></label>
+<fieldset class="ui-grid-a">
+    <div class="ui-block-a"><input type="button" value="Save" onclick="getdata()"></div>
+    <div class="ui-block-b"><input data-theme="b" type="reset" value="Back" onClick="parent.location='personal.html'"></div>
+</fieldset>
+</div>
+</form>
+</body>
+</html>

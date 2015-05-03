@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DietControlPro</title>
+	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="stylesheet"  href="css/jquery.mobile-1.4.0.min.css">
+	<link rel="stylesheet" href="_assets/css/jqm-demos.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
+	<script src="js/jquery.js"></script>
+	<script src="_assets/js/index.js"></script>
+	<script src="js/jquery.mobile-1.4.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/phonegap-1.2.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+    // Wait for PhoneGap to load
+	var db = null;
+	document.addEventListener("deviceready", onDeviceReady, false);
+
+// PhoneGap is ready
+function onDeviceReady() {
+	db = window.openDatabase("Database14", "1.0", "controlpro", 200000); 
+	db.transaction(populateDB, errorCB, successCB); 
+	}
+
+// Populate the database
+ function populateDB(tx) {
+ 	// tx.executeSql('DROP TABLE IF EXISTS user');
+	tx.executeSql("CREATE TABLE IF NOT EXISTS user (id INT, gender TEXT, age INT, height INT, weight INT, level TEXT, program TEXT, calories INT)"); 
+
+	tx.executeSql("CREATE TABLE IF NOT EXISTS cdate (id INT,date TEXT)");
+
+	tx.executeSql("CREATE TABLE IF NOT EXISTS exlog (exdate TEXT,cal INT)");
+
+	tx.executeSql("CREATE TABLE IF NOT EXISTS fdlog (fddate TEXT,cal INT)"); 
+
+	//tx.executeSql('DROP TABLE IF EXISTS actlog');
+
+	tx.executeSql("CREATE TABLE IF NOT EXISTS actlog (id INTEGER primary key AUTOINCREMENT, act_date TEXT , act_id INTEGER, duration INTEGER)");
+
+	//tx.executeSql('INSERT INTO actlog (act_date, act_id , duration) VALUES ("Fri 09 May 2014",1,20)');
+
+	tx.executeSql("CREATE TABLE IF NOT EXISTS act (ad_num INTEGER primary key, ad_name TEXT, ad_cph INTEGER)"); 
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (1, "soccer", 260)'); 
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (2, "Weight Lifting", 112)');
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (3, "Bicycling", 260)');
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (4, "Swimming", 223)');
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (5, "Tennis", 260)');
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (6, "Running", 355)');
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (7, "Sitting in Class", 65)');
+		tx.executeSql('INSERT INTO act (ad_num, ad_name, ad_cph) VALUES (8, "Walking", 232)');
+	
+	// tx.executeSql('DROP TABLE IF EXISTS foodlog');
+	tx.executeSql("CREATE TABLE IF NOT EXISTS foodlog (id INTEGER primary key AUTOINCREMENT, food_date TEXT , food_id INTEGER, quantity INTEGER)");
+
+	// tx.executeSql('DROP TABLE IF EXISTS food');
+	tx.executeSql("CREATE TABLE IF NOT EXISTS food (food_num INTEGER primary key, food_name TEXT, food_cph INTEGER)"); 
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (1, "Bananas, raw", 92)'); 
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (2, "Egg, whole, cooked, fried", 199)');
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (3, "Rice, brown, long-grain, cooked", 111)');
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (4, "Rice, white, long-grain, regular, cooked", 130)');
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (5, "Spinach, raw", 22)');
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (6, "Tomatoes, sun-dried", 258)');
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (7, "Wasabi, root, raw", 109)');
+		tx.executeSql('INSERT INTO food (food_num, food_name, food_cph) VALUES (8, "Yardlong beans, mature seeds, raw", 347)');
+	}
+	
+// Transaction error callback
+function errorCB(tx, err) {
+	// alert("Error processing SQL: "+err);
+	}
+
+// Transaction success callback
+function successCB() {
+	// alert("success!");
+	}
+
+
+window.onload = function () { if(! window.device) onDeviceReady() } 
+
+</script>
+
+
+
+
+    <style>
+    .ui-page{
+        background-color:#ffb6c1;
+    }
+    </style>
+
+
+</head>
+<body>
+<br>
+<br>
+<center><h2 style="color:grey">DietControlPro</h2></center>
+<hr>
+<button style="background-color:#32cd32;" onClick="parent.location='personal.html'">Personal Information</button>
+<button style="background-color:#00bfff;" onClick="parent.location='calories.html'">Calories Tracker</button>
+<button style="background-color:#ff6347;" onClick="parent.location='report.html'">Report</button>
+
+
+
+</body>
+</html>

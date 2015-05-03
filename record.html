@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DietControlPro</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet"  href="css/jquery.mobile-1.4.0.min.css">
+  <link rel="stylesheet" href="_assets/css/jqm-demos.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
+  <script src="js/jquery.js"></script>
+  <script src="_assets/js/index.js"></script>
+  <script src="js/jquery.mobile-1.4.0.min.js"></script>
+  
+  <script type="text/javascript" charset="utf-8" src="js/phonegap-1.2.0.js"></script>
+	<script type="text/javascript" charset="utf-8">
+// Wait for PhoneGap to load
+var db = null;
+var date;
+document.addEventListener("deviceready", onDeviceReady, false);
+
+// PhoneGap is ready
+function onDeviceReady() {
+	db = window.openDatabase("Database14", "1.0", "controlpro", 200000); 
+	db.transaction(populateDB, errorCB, successCB); 
+	}
+
+// Populate the database
+ function populateDB(tx) {
+  tx.executeSql("CREATE TABLE IF NOT EXISTS user (id INT, gender TEXT, age INT, height INT, weight INT, level TEXT, program TEXT, calories INT)"); 
+
+
+  tx.executeSql("SELECT * FROM cdate",[] ,function (tx, results) {              
+    len = results.rows.length;
+    len--;         
+    date = results.rows.item(len).date;
+    document.querySelector('#date').innerHTML = date;
+    // alert(date);
+  });
+
+
+    db.transaction(function (tx) {
+      tx.executeSql("SELECT * FROM foodlog l, food f WHERE l.food_id = f.food_num AND l.food_date=?",[date], function (tx, results) {
+          
+     var len = results.rows.length, i;
+     // alert(len);
+     var total = 0;
+     var x,y,a,id,url;
+     
+     for (i = 0; i < len; i++){
+       id = results.rows.item(i).id;
+       x = results.rows.item(i).food_cph;
+       y = results.rows.item(i).quantity;
+       a=x*y/100;
+       total+=a;
+       
+       url = '<div class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext ui-btn-inline" onClick="deleteFood(' + id + ')" /></div>';
+
+       
+      msg ="<tr><td class=\"title\"><b style=\"color:orange;\">"+results.rows.item(i).food_name+"</b></td><td>"+a.toFixed(0)+" kCal</td><td>"+url+"</td></tr>";
+      //alert(msg);
+       document.querySelector('#foodlist').innerHTML +=  msg;
+     }
+    
+     total =total.toFixed(0);
+     document.querySelector('#food').innerHTML +=  total+" kCal";
+     
+     db.transaction(function(tx){
+      tx.executeSql("DELETE FROM fdlog WHERE fddate=?",[date]);
+      tx.executeSql("INSERT INTO fdlog (fddate,cal) VALUES (?,?)",
+               [date,total]);
+      });
+     // alert();
+     }, null);
+    });
+
+    db.transaction(function (tx) {
+      tx.executeSql("SELECT * FROM actlog p, act l WHERE p.act_id = l.ad_num AND p.act_date=?",[date], function (tx, results) {
+          
+     var len = results.rows.length, i;
+     // alert(len);
+     var total = 0;
+     var x,y,a,id,url;
+     
+     for (i = 0; i < len; i++){
+       id = results.rows.item(i).id;
+       x = results.rows.item(i).ad_cph;
+       y = results.rows.item(i).duration;
+       a=x*y/60;
+       total+=a;
+       
+       url = '<div class="ui-btn ui-shadow ui-corner-all ui-icon-delete ui-btn-icon-notext ui-btn-inline" onClick="deleteExer(' + id + ')" /></div>';
+
+       //msg = results.rows.item(i).ad_name+" : "+a.toFixed(0)+"  "+url;
+
+      msg ="<tr><td class=\"title\"><b style=\"color:#00ced1;\">"+results.rows.item(i).ad_name+"</b></td><td>"+a.toFixed(0)+" kCal</td><td>"+url+"</td></tr>";
+       // msg = "<b><p>"+results.rows.item(i).ad_name+" : "+a.toFixed(0)+"</p></b>";
+       document.querySelector('#exlist').innerHTML +=  msg;
+     }
+    
+     msg =total.toFixed(0);
+     document.querySelector('#exer').innerHTML +=  msg+" kCal";
+
+     db.transaction(function(tx){
+      tx.executeSql("DELETE FROM exlog WHERE exdate=?",[date]);
+      tx.executeSql("INSERT INTO exlog (exdate,cal) VALUES (?,?)",
+              [date,msg]);
+            });
+     }, null);
+    });
+    
+	}
+	
+// Transaction error callback
+function errorCB(tx, err) {
+	// alert("Error processing SQL: "+err);
+	}
+
+// Transaction success callback
+function successCB() {
+	// alert("success!");
+	}
+function deleteExer(Nid){
+  var id = Nid;
+  db.transaction(function(tx){
+      tx.executeSql("DELETE FROM actlog WHERE id=?",[id]);
+      // });
+  }, null);
+  
+  location.reload();
+  
+}
+      
+function deleteFood(Nid){
+  var id = Nid;
+  db.transaction(function(tx){
+      tx.executeSql("DELETE FROM foodlog WHERE id=?",[id]);
+   // });
+  }, null);
+  location.reload();
+  
+}
+
+window.onload = function () { if(! window.device) onDeviceReady() } 
+
+</script>
+
+ <style>
+ .ui-icon-carat-l{
+        width: 50px;
+        height: 50px;
+    }
+ }
+ .ui-icon-delete{
+        width: 50px;
+        height: 50px;
+ }
+ </style>
+  
+  
+</head>
+<body>
+    <br>
+    <br>
+    <div data-role="navbar">
+        <ul>
+            <li><a href="#" onClick="parent.location='calories.html'" class="ui-btn ui-shadow ui-corner-all ui-icon-carat-l ui-btn-icon-notext ui-btn-inline">Back</a></li>
+            <li style="margin-left:-50px"><h2 style="color:grey">DietControlPro</h2></li>
+        </ul>
+    </div><!-- /navbar -->
+<hr>
+<center><strong><div id="date" style="font-size:120%;"></div></strong></center>
+<hr>
+<div class="ui-grid-a">
+    <div class="ui-block-a" style="margin-right:-120px;"></div>
+    <div class="ui-block-b"><input type="reset" data-theme="a" value="Add Food" onClick="parent.location='food.html'"></div>
+    
+</div>
+<br>
+<div class="ui-grid-a">
+    <div class="ui-block-a">
+      <div style="font-size:120%; height:50px; color:#fa8072; font-weight: bold; text-decoration: underline;">Total Food Calories:</div>
+    </div>
+    <div class="ui-block-b">
+      <div id="food" style="font-size:120%; height:50px; font-weight: bold;"></div>
+    </div>
+</div>
+<hr>
+<label style="font-size:120%; height:20px; color:red; font-weight: bold; text-decoration: underline;">Food List:</label>
+<br>
+<table data-role="table" data-mode="reflow" class="ui-responsive table-stroke" style="margin-left:40px">
+     <thead>
+     </thead>
+     <tbody id ="foodlist">
+     </tbody>
+   </table>
+<hr>
+<div class="ui-grid-a">
+    <div class="ui-block-a" style="margin-right:-120px;"></div>
+    <div class="ui-block-b"><input type="reset" data-theme="b" value="Add Exercise" onClick="parent.location='exercise.html'"></div>
+    
+</div>
+<br>
+<div class="ui-grid-a">
+    <div class="ui-block-a">
+      <div style="font-size:120%; height:50px; color:#b8860b; font-weight: bold; text-decoration: underline;">Total Exercise Calories:</div>
+    </div>
+    <div class="ui-block-b">
+      <div id="exer" style="font-size:120%; height:50px; font-weight: bold;"></div>
+    </div>
+</div>
+<hr>
+<label style="font-size:120%; height:20px; color:green; font-weight: bold; text-decoration: underline;">Exercise List:</label><br>
+<table data-role="table" data-mode="reflow" class="ui-responsive table-stroke" style="margin-left:40px">
+     <thead>
+     </thead>
+     <tbody id ="exlist">
+     </tbody>
+   </table>
+<br>
+</body>
+</html>

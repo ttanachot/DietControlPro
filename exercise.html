@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>DietControlPro</title>
+	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="stylesheet"  href="css/jquery.mobile-1.4.0.min.css">
+	<link rel="stylesheet" href="_assets/css/jqm-demos.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
+	<script src="js/jquery.js"></script>
+	<script src="_assets/js/index.js"></script>
+	<script src="js/jquery.mobile-1.4.0.min.js"></script>
+
+	<script type="text/javascript" charset="utf-8" src="js/phonegap-1.2.0.js"></script>
+	<script type="text/javascript" charset="utf-8">
+	// Wait for PhoneGap to load
+	var db = null;
+	var date;
+	document.addEventListener("deviceready", onDeviceReady, false);
+
+	// PhoneGap is ready
+	function onDeviceReady() {
+		db = window.openDatabase("Database14", "1.0", "controlpro", 200000); 
+		db.transaction(populateDB, errorCB, successCB); 
+		}
+
+	// Populate the database
+	function populateDB(tx) {
+		
+		tx.executeSql("SELECT * FROM cdate",[] ,function (tx, results) {              
+    	len = results.rows.length;
+    	len--;         
+    	date = results.rows.item(len).date;
+    	document.querySelector('#date').innerHTML +=  date;
+  		});
+	}
+
+	 function insert() {
+	 		
+			var activity = document.getElementById("activity").value;
+			var duration = document.getElementById("duration").value;
+
+			db.transaction(function(tx){
+			tx.executeSql("INSERT INTO actlog (act_date, act_id , duration) VALUES (?,?,?)",
+           		[date,activity,duration ]);
+         		});
+			// alert("done");
+			window.location.assign("record.html");
+			}
+
+	// Transaction error callback
+	function errorCB(tx, err) {
+		// alert("Error processing SQL: "+err);
+		}
+
+	// Transaction success callback
+	function successCB() {
+		// alert("success!");
+		}
+
+	window.onload = function () { if(! window.device) onDeviceReady() } 
+</script>
+<style>
+ .ui-icon-carat-l{
+        width: 50px;
+        height: 50px;
+    }
+ }
+ </style>
+</head>
+<body>
+
+<br>
+    <br>
+    <div data-role="navbar">
+        <ul>
+            <li><a href="#" onClick="parent.location='record.html'" class="ui-btn ui-shadow ui-corner-all ui-icon-carat-l ui-btn-icon-notext ui-btn-inline">Back</a></li>
+            <li style="margin-left:-50px"><h2 style="color:grey">DietControlPro</h2></li>
+        </ul>
+    </div><!-- /navbar -->
+<hr>
+</div>
+
+<center><strong><div id="date" style="font-size:120%;"></div></strong></center>
+<hr>
+
+<div class="ui-grid-a">
+    <div class="ui-block-a">
+     <label style="font-size:120%; font-weight: bold; padding-top:10px" for="select-native-fc">Exercise:</label>
+    </div>
+    <div class="ui-block-b">
+      <select name="select-native-fc" id="activity">
+    	<option> Select Exercise</option>
+        <option value="1">Soccer</option>
+        <option value="2">Weight Lifting</option>
+        <option value="3">Bicycling</option>
+        <option value="4">Swimming</option>
+        <option value="5">Tennis</option>
+        <option value="6">Running</option>
+        <option value="7">Sitting in Class</option>
+        <option value="8">Walking</option>
+    </select>
+    </div>
+</div>
+   <hr>
+<div class="ui-grid-a">
+    <div class="ui-block-a">
+    	<label for="date" style="font-size:120%; font-weight: bold; padding-top:10px">Duration(minutes):</label>
+	</div>
+	<div class="ui-block-b">
+		<input type="number" name="duration" id="duration" data-inline="true">
+	</div>
+</div>
+<hr>
+
+<div class="ui-field-contain">
+<label for="text-basic"></label>
+<fieldset class="ui-grid-a">
+    <div class="ui-block-a"><input type="button" data-theme="a" value="Add" onclick="insert();"></div>
+    <div class="ui-block-b"><input type="reset" data-theme="b" value="Cancel" onClick="parent.location='record.html'"></div>
+</fieldset>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DietControlPro</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet"  href="css/jquery.mobile-1.4.0.min.css">
+  <link rel="stylesheet" href="_assets/css/jqm-demos.css">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,700">
+  <script src="js/jquery.js"></script>
+  <script src="_assets/js/index.js"></script>
+  <script src="js/jquery.mobile-1.4.0.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="js/phonegap-1.2.0.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    var pre = 0;
+    var nxt = 0;
+    // Wait for PhoneGap to load
+    var db = null;
+    var date;
+    var calories;
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // PhoneGap is ready
+    function onDeviceReady() {
+        db = window.openDatabase("Database14", "1.0", "controlpro", 200000); 
+        db.transaction(populateDB, errorCB, successCB); 
+        }
+        // Populate the database
+     function populateDB(tx) {
+        pre = 0;
+        nxt = 0;
+        // tx.executeSql('DROP TABLE IF EXISTS user');
+        // tx.executeSql("CREATE TABLE IF NOT EXISTS user (id INT, gender TEXT, age INT, height INT, weight INT, level TEXT, program TEXT, calories INT)"); 
+        db.transaction(function (tx) {
+        tx.executeSql("SELECT * FROM user",[] ,function (tx, results) {
+                
+            len = results.rows.length;
+            len--;
+                var gender = results.rows.item(len).gender;
+                var age = results.rows.item(len).age;
+                var height = results.rows.item(len).height;
+                var weight = results.rows.item(len).weight;
+                var level = results.rows.item(len).level;
+                var program = results.rows.item(len).program+" weight";
+                calories = results.rows.item(len).calories;
+                calories = parseFloat(calories).toFixed(0);
+                goal = calories;
+                var calo = calories.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                document.querySelector('#calories').innerHTML =  calo;
+                document.querySelector('#goal').innerHTML =  "<center>"+calo+"</center>";
+
+
+        }, null);
+         });
+
+        var now = new Date();
+        var d = now.toDateString();
+        var x = d.split(" ");
+        date = x[0]+" "+x[2]+" "+x[1]+" "+x[3];
+        db.transaction(function (tx) {
+            tx.executeSql("DELETE FROM cdate WHERE id=?",[1]);
+            tx.executeSql("INSERT OR REPLACE INTO cdate (id, date) VALUES (?,?)",[1,date]); 
+
+            });
+
+        document.querySelector('#date').innerHTML +=  date;
+
+        update();
+
+        }
+
+        // Transaction error callback
+        function errorCB(tx, err) {
+            // alert("Error processing SQL: "+err);
+            }
+
+        // Transaction success callback
+        function successCB() {
+            // alert("success!");
+            }
+
+        function resetData(){
+            db.transaction(function (tx) {
+              tx.executeSql("DELETE FROM user WHERE id=?",[1]);
+            });
+            location.reload();
+        }
+        
+        function prev(){
+          pre++;
+          var now = new Date();
+          now.setDate(now.getDate()-pre+nxt);
+          
+          var d = now.toDateString();
+          var x = d.split(" ");
+
+          var check = new Date();
+          check = check.toDateString();
+          date = x[0]+" "+x[2]+" "+x[1]+" "+x[3];
+          db.transaction(function (tx) {
+            tx.executeSql("DELETE FROM cdate WHERE id=?",[1]);
+            tx.executeSql("INSERT OR REPLACE INTO cdate (id, date) VALUES (?,?)",[1,date]);
+          });
+          var change = date;
+          if (d != check){
+            change = "<font color=\"red\">"+x[0]+" "+x[2]+" "+x[1]+" "+x[3]+"</font>";
+          }
+          document.querySelector('#date').innerHTML =  change;
+
+          update();
+        }
+
+        function next(){
+          nxt++;
+          var now = new Date();
+          now.setDate(now.getDate()-pre+nxt);
+          
+          var d = now.toDateString();
+          var x = d.split(" ");
+          
+          var check = new Date();
+          check = check.toDateString();
+          date = x[0]+" "+x[2]+" "+x[1]+" "+x[3];
+          db.transaction(function (tx) {
+            tx.executeSql("DELETE FROM cdate WHERE id=?",[1]);
+            tx.executeSql("INSERT OR REPLACE INTO cdate (id, date) VALUES (?,?)",[1,date]);
+          });
+          var change = date;
+          if (d != check){
+            change = "<font color=\"red\">"+x[0]+" "+x[2]+" "+x[1]+" "+x[3]+"</font>";
+          }
+          document.querySelector('#date').innerHTML =  change;
+          update();
+        }
+
+        function record(){
+          var now = new Date();
+          now.setDate(now.getDate()-pre+nxt);
+          
+          var d = now.toDateString();
+          var x = d.split(" ");
+          
+          var check = new Date();
+          check = check.toDateString();
+          date = x[0]+" "+x[2]+" "+x[1]+" "+x[3];
+          db.transaction(function (tx) {
+            tx.executeSql("DELETE FROM cdate WHERE id=?",[1]);
+            tx.executeSql("INSERT OR REPLACE INTO cdate (id, date) VALUES (?,?)",[1,date]);
+            });
+          
+          window.location.assign("record.html");
+        }
+
+        function update(){
+
+          db.transaction(function (tx) {
+
+          var exercise = 0;
+          var food = 0;
+          var checkdata = false;
+          var checkdata2 = false;
+          
+          tx.executeSql("SELECT * FROM exlog WHERE exdate=? ",[date], function (tx, results) {
+        
+          exercise = results.rows.item(0).cal;
+          
+            // exercise = 0;
+          
+          checkdata = true;
+          var msg = "-"+results.rows.item(0).cal;  
+          document.querySelector('#exercise').innerHTML =  msg;
+           }, null);
+
+          tx.executeSql("SELECT * FROM fdlog WHERE fddate=? ",[date], function (tx, results) {
+            food = results.rows.item(0).cal;
+            checkdata2 = true;
+            var msg = "+"+results.rows.item(0).cal; 
+            document.querySelector('#food').innerHTML =  msg;
+           calories = goal;
+           var net = food - exercise;
+           calories = calories-food;
+          document.querySelector('#calories').innerHTML =  calories;
+          document.querySelector('#net').innerHTML =  net;
+
+          }, null);
+          
+          if(checkdata == false){
+            exercise =0;
+            document.querySelector('#exercise').innerHTML =  exercise;
+            var net = food - exercise;
+            document.querySelector('#net').innerHTML =  net;
+          }
+          if (checkdata2 == false){
+            food = 0;
+            document.querySelector('#food').innerHTML =  food;
+            var net = food - exercise;
+            document.querySelector('#net').innerHTML =  net;
+            calories = goal;
+            document.querySelector('#calories').innerHTML =  calories;
+          }
+
+          });
+
+          var net = food - exercise;
+          document.querySelector('#net').innerHTML =  net;
+
+
+        }
+
+
+        window.onload = function () { if(! window.device) onDeviceReady() }
+    </script>
+
+    
+    <style>
+    .ui-page{
+        background-color:#e0ffff;
+    }
+    .ui-icon-carat-l{
+        width: 50px;
+        height: 50px;
+    }
+    .ui-icon-arrow-r {
+        width: 10px;
+        height: 20px;
+    }
+    .ui-icon-arrow-l {
+        width: 10px;
+        height: 20px;
+    }
+
+    div.ui-input-text { background-color:#ffffff;}
+    </style>
+
+</head>
+<body>
+<br>
+<br>
+    <div data-role="navbar">
+        <ul>
+            <li><a href="#" onClick="parent.location='home.html'" class="ui-btn ui-shadow ui-corner-all ui-icon-carat-l ui-btn-icon-notext ui-btn-inline">Back</a></li>
+            <li style="margin-left:-50px"><h2 style="color:grey">DietControlPro</h2></li>
+        </ul>
+    </div><!-- /navbar -->
+    <hr>
+    <center><strong><div id="date" style="color:#00bfff; font-size:120%;"></div></strong></center>
+    <hr>
+    <div class="ui-grid-a">
+        <div class="ui-block-a">
+          <div id="calories" style="color:#00ced1; font-size:200%; padding-left:15px;"></div>
+         <label for="calories" style="font-size:50%; padding-left:5px;">CALORIES REMAINING</label>
+        </div>
+        <div class="ui-block-b" style="margin-left:-20px;">
+          <button class="ui-btn ui-shadow ui-btn-b ui-icon-plus ui-btn-icon-left" onclick="record()">Record</button>
+        </div>
+    </div><!-- /grid-a -->
+    <hr>
+    <br>
+
+    <div class="ui-grid-c">
+      <div class="ui-block-a">
+          <div id class="ui-bar ui-bar-a" style="font-size:80%; height:50px; color:grey">Goal:
+          <center><div id ="goal"></div></center>
+          </div>
+      </div>
+      <div class="ui-block-b">
+          <div class="ui-bar ui-bar-a" style="font-size:80%; height:50px; color:#fa8072">Food:
+          <center><div id ="food"></div></center>
+          </div>
+      </div>
+      <div class="ui-block-c">
+          <div class="ui-bar ui-bar-a" style="font-size:80%; height:50px; color:#b8860b">Exercise:
+          <center><div id ="exercise"></div></center>
+          </div>
+      </div>
+      <div class="ui-block-d">
+          <div class="ui-bar ui-bar-a" style="font-size:80%; height:50px; color:#228b22">Net:
+          <center><div id ="net" ></div></center>
+          </div>
+      </div>
+    </div><!-- /grid-c -->
+    <br>
+    <hr>
+
+      <div class="ui-grid-d">
+
+          <div class="ui-block-a"><a href="#" onclick="prev()" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left"></a></div>
+          <div class="ui-block-b"></div>
+          <div class="ui-block-c"></div>
+          <div class="ui-block-d"></div>
+          <div class="ui-block-e"><a href="#" onclick="next()" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-r ui-btn-icon-right"></a></div>
+      </div><!-- /grid-c -->
+    
+
+</body>
+</html>
